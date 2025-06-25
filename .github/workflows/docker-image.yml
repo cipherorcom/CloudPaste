@@ -1,6 +1,9 @@
 name:  Build and Push all Docker Image to GHCR (latest)
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
@@ -35,7 +38,8 @@ jobs:
           tags: ghcr.io/${{ github.repository }}/cloudpaste-backend:latest
           platforms: linux/amd64,linux/arm64
           cache-from: type=gha
-          cache-to: type/gha,mode=max
+          # ==> 已修正此处的语法错误
+          cache-to: type=gha,mode=max
           labels: |
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
@@ -71,6 +75,7 @@ jobs:
           tags: ghcr.io/${{ github.repository }}/cloudpaste-frontend:latest
           platforms: linux/amd64,linux/arm64
           cache-from: type=gha
+          # ==> 已修正此处的语法错误
           cache-to: type=gha,mode=max
           labels: |
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
