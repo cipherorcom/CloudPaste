@@ -29,20 +29,28 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # ==> 1. 重新引入 metadata-action 来生成小写标签
+      - name: 提取 Docker 元数据
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}/cloudpaste-backend
+          tags: |
+            type=raw,value=latest
+
       - name: 构建并推送后端镜像
         uses: docker/build-push-action@v6
         with:
           context: .
           file: ./docker/backend/Dockerfile
           push: true
-          tags: ghcr.io/${{ github.repository }}/cloudpaste-backend:latest
+          # ==> 2. 使用 metadata-action 的输出作为标签和 Labels
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64,linux/arm64
           cache-from: type=gha
-          # ==> 已修正此处的语法错误
           cache-to: type=gha,mode=max
-          labels: |
-            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
-            org.opencontainers.image.revision=${{ github.sha }}
+
 
   build-frontend:
     runs-on: ubuntu-latest
@@ -66,17 +74,24 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # ==> 1. 重新引入 metadata-action 来生成小写标签
+      - name: 提取 Docker 元数据
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}/cloudpaste-frontend
+          tags: |
+            type=raw,value=latest
+
       - name: 构建并推送前端镜像
         uses: docker/build-push-action@v6
         with:
           context: .
           file: ./docker/frontend/Dockerfile
           push: true
-          tags: ghcr.io/${{ github.repository }}/cloudpaste-frontend:latest
+          # ==> 2. 使用 metadata-action 的输出作为标签和 Labels
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64,linux/arm64
           cache-from: type=gha
-          # ==> 已修正此处的语法错误
           cache-to: type=gha,mode=max
-          labels: |
-            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
-            org.opencontainers.image.revision=${{ github.sha }}
